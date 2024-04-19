@@ -6,4 +6,4 @@ Trabajé con un conjunto de datos de PROFECO llamado [Quien es Quien en los Prec
 FILES:
 
 - NotebookQuienEsQuie.ipynb: Aquí está todo el preprocesamiento de los datos explicado a detalle, una visualización del problema, y la implementación del algoritmo junto con un ejemplo de su implementación.
-- Documento pdf donde se explica el modelo matemático.
+- DocumentacionTecnicaProyecto.pdf: Aquí se explica el modelo y la justificación matemática.
