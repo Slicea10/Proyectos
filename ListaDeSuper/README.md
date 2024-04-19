@@ -5,5 +5,5 @@ Trabajé con un conjunto de datos de PROFECO llamado [Quien es Quien en los Prec
 
 FILES:
 
-- Notebook .ipynb del preprocesamiento de los datos y del algoritmo junto con un ejemplo de su implementación.
+- NotebookQuienEsQuie.ipynb: Aquí está todo el preprocesamiento de los datos explicado a detalle, así como la implementación del algoritmo junto con un ejemplo de su implementación.
 - Documento pdf donde se explica el modelo matemático.
