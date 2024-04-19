@@ -1,4 +1,5 @@
 ABOUT:
+
 In this project, I applied statistical and machine learning models to predict the Return on Investment (ROI) of stocks from companies in the S&P 500 index. The program is designed for swing traders who may want to consider the next day's predicted ROI from multiple models. 
 
 FILES:
