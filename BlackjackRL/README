@@ -1,1 +1,1 @@
-En este proyecto apliqué Deep Q Learning para intentar llegar a una política óptima para el juego de cartas Blackjack.
+En este proyecto apliqué Deep Q Learning para llegar a una política óptima para Blackjack. Adicionalmente, dentro de la implementación se encuentra una clase para simular rondas del juego, así como una clase que además de simular rondas usa la llamada 'basic strategy' para tomar decisiones (esto para al final comparar esta estrategia perfecta con la que obtiene nuestro agente).
