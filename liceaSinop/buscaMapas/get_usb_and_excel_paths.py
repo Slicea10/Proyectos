@@ -1,4 +1,4 @@
-from find_usb_path import getUSBPath
+from .find_usb_path import getUSBPath
 import tkinter as tk
 import os, shutil, threading, subprocess, platform
 from pathlib import Path
