@@ -1,4 +1,4 @@
-from .find_usb_path import getUSBPath
+from find_usb_path import getUSBPath
 import tkinter as tk
 import os, shutil, threading, subprocess, platform
 from pathlib import Path
@@ -68,7 +68,7 @@ class ProgressDialog(tk.Toplevel):
 class App(BaseApp):          
     def __init__(self):
         super().__init__()
-        self.title("Extractor de mapas")
+        self.title("Buscador de mapas")
         self.usb_path = None
         self.usb_label = "KINGSTON"
         self.excel_path = None
@@ -342,7 +342,7 @@ class App(BaseApp):
                 self.after(0, lambda: (
                     setattr(dlg.bar, "mode", "determinate"),
                     dlg.bar.config(maximum=len(svals), value=0),
-                    dlg.msg_var.set("Extrayendo mapas de cada sección...")
+                    dlg.msg_var.set("Copiando mapas de cada sección...")
                 ))
 
                 def safe_copy(src_path: Path, dst_folder: Path):
@@ -394,8 +394,8 @@ class App(BaseApp):
                 def done_ui():
                     dlg.destroy()
                     message = [
-                        f"PDFs escaneados: {pdf_count}",
-                        f"Secciones únicas en Excel: {len(svals)}",
+                        f"PDFs en cartografia: {pdf_count}",
+                        f"Secciones únicas en la muestra: {len(svals)}",
                         f"PDFs copiados: {copied}",
                         f"Secciones sin mapa: {len(unmatched)}",
                         f"\nCarpeta exportada:\n{export_dir}"

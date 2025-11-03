@@ -1,4 +1,0 @@
-pandas>=2.1
-openpyxl>=3.1
-# Optional: enable drag & drop support when available
-tkinterdnd2>=0.3

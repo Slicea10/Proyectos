@@ -1,3 +1,0 @@
-([('USB Excel Loader',
-   '/Users/santiagolicea10/Desktop/Proyectos/dist/USB Excel Loader',
-   'EXECUTABLE')],)
