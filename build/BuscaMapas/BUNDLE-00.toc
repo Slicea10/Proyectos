@@ -1,0 +1,3 @@
+([('BuscaMapas',
+   '/Users/santiagolicea10/Desktop/Proyectos/dist/BuscaMapas',
+   'EXECUTABLE')],)

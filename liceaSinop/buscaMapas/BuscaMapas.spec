@@ -6,7 +6,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['tkinterdnd2'],
+    hiddenimports=['tkinterdnd2', 'pandas', 'openpyxl'],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
@@ -26,12 +26,5 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,                  # no console window
-    icon='buscaMapasLogo.ico'       # on macOS change to .icns
-)
-
-app = BUNDLE(
-    exe,
-    name='BuscaMapas.app',
-    icon='buscaMapasLogo.icns',
-    bundle_identifier=None,
+    icon='buscaMapasLogo.ico'       # on Mac change to .icns
 )

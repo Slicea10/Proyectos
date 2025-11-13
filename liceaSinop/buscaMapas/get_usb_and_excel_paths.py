@@ -230,6 +230,8 @@ class App(BaseApp):
         col_list = "\n".join([f"{i+1}. {str(c).replace('\n', ' ').strip()}" for i, c in enumerate(cols)])
         msg = f"El archivo contiene las siguientes columnas:\n\n{col_list}\n\nIngresa el número de la columna que especifique la Sección:"
 
+        msg2 = f"El archivo contiene las siguientes columnas:\n\n{col_list}\n\nIngresa el número de la columna que especifique el Estado:"
+
         # Ask the user for a column number
         choice = simpledialog.askinteger(
             "Seleccionar columna",
@@ -238,18 +240,28 @@ class App(BaseApp):
             minvalue=1,
             maxvalue=len(cols)
         )
-
         if choice is None:
+            return  # user cancelled
+        
+        choice2 = simpledialog.askinteger(
+            "Seleccionar columna",
+            msg2,
+            parent=self,
+            minvalue=1,
+            maxvalue=len(cols)
+        )
+        if choice2 is None:
             return  # user cancelled
 
         # Get the chosen column name
         seccion_col = cols[choice - 1]
+        estado_col = cols[choice2 - 1]
 
         # Now run pdf_search directly
-        self.pdf_search(seccion_col, df)
+        self.pdf_search(seccion_col, estado_col, df)
 
 
-    def pdf_search(self, seccion: str, df: pd.DataFrame):
+    def pdf_search(self, seccion: str, estado: str, df: pd.DataFrame):
     # --- Validate inputs and load Excel ---
         if not getattr(self, "excel_path", None) or not os.path.isfile(self.excel_path):
             messagebox.showerror("Falta archivo", "No se ha definido un Excel válido.")
@@ -263,18 +275,31 @@ class App(BaseApp):
             messagebox.showerror("Columna no encontrada",
                                 f"No existe la columna '{seccion}' en el Excel.")
             return
-
-        # Tomar valores únicos (4 dígitos) de la columna
-        svals = (
+        if estado not in df.columns:
+            messagebox.showerror("Columna no encontrada",
+                                f"No existe la columna '{estado}' en el Excel.")
+            return
+ 
+        # Tomar valores (4 dígitos) de la columna
+        secciones = (
             pd.to_numeric(df[seccion], errors="coerce")
             .dropna()
             .astype(int)
             .map(lambda x: f"{x:04d}") # 4 digit integer with 0 padding if length less than 4 digits
-            .unique()
             .tolist()
         )
-        if not svals:
+        if not secciones:
             messagebox.showwarning("Sin valores", f"La columna '{seccion}' no contiene enteros válidos.")
+            return
+        
+        estados = (
+            pd.to_numeric(df[estado], errors="coerce")
+            .dropna()
+            .astype(int)
+            .tolist()
+        )
+        if not estados:
+            messagebox.showwarning("Sin valores", f"La columna '{estado}' no contiene enteros válidos.")
             return
         
         # --- Elegir destino y crear carpeta 'mapas' ---
@@ -305,32 +330,40 @@ class App(BaseApp):
 
         def run_work():
             try:
-                cartografia_dir = Path(self.usb_path) / "cartografia"
-                if not cartografia_dir.exists():
-                    messagebox.showerror("Carpeta no encontrada",
-                                        f"No existe la carpeta 'cartografia' en:\n{self.usb_path}")
-                    return
-                
                 # ---------- Phase 1: scan PDFs inside usbPath/cartografia folder & build code_to_paths (dict with structure {'seccion #': [pdf paths]}) ----
                 self.after(0, dlg.bar.start(10))  # start indeterminate. self.after()... to run this on the main thread whenever theres availability. (10 for faster bouncing)
                 self.after(0, lambda: dlg.msg_var.set("Escaneando PDFs en 'cartografia'..."))
 
-                code_to_paths = {}
-                pdf_count = 0
-                for pdf in cartografia_dir.rglob("*.pdf"):
-                    name = pdf.name  # sólo el nombre de archivo
-                    if len(name) >= 16:  # necesitamos posiciones [12:16]
-                        code = name[12:16]
-                        if code.isdigit() and len(code) == 4:
-                            code_to_paths.setdefault(code, []).append(pdf)
-                            pdf_count += 1
-                    # Periodically refresh status text
-                    if pdf_count % 5000 == 0:
-                        self.after(0, lambda c=pdf_count: dlg.msg_var.set(f"{c} PDFs escaneados..."))
+                edoSeccPathDic = {} # dict {edoNum: {seccNum: pdfPath}}
+                pdf_count_all = 0
+                for edo in set(estados):
+                    cartografia_root = Path(self.usb_path) / "cartografia" 
+                    # Find the first matching folder
+                    pattern = f"{edo}.*"   # matches "7. Chiapas", "22. Queretaro", etc.
+                    cartografia_dir = next(cartografia_root.glob(pattern), None)
+                    if not cartografia_dir.exists():
+                        messagebox.showerror("Carpeta no encontrada",
+                                        f"No existe la carpeta {cartografia_dir} en:\n{self.usb_path}")
+                        return
+                    code_to_paths = {}
+                    pdf_count = 0
+                    for pdf in cartografia_dir.rglob("*.pdf"):
+                        name = pdf.name  # sólo el nombre de archivo
+                        if len(name) >= 16:  # necesitamos posiciones [12:16]
+                            code = name[12:16]
+                            if code.isdigit() and len(code) == 4:
+                                code_to_paths.setdefault(code, []).append(pdf)
+                                pdf_count += 1
+                                pdf_count_all += 1
+                        # Periodically refresh status text
+                        if pdf_count_all % 5000 == 0:
+                            self.after(0, lambda c=pdf_count_all: dlg.msg_var.set(f"{c} PDFs escaneados..."))
 
-                if pdf_count == 0:
-                    messagebox.showwarning("Sin PDFs", "No se encontraron PDFs en 'cartografia'.")
-                    return
+                    if pdf_count == 0:
+                        messagebox.showwarning("Sin PDFs", f"No se encontraron PDFs para el estado {edo}.")
+                        return
+                    else:
+                        edoSeccPathDic[edo] = code_to_paths
 
                 self.after(0, dlg.bar.stop)
 
@@ -341,7 +374,7 @@ class App(BaseApp):
 
                 self.after(0, lambda: (
                     setattr(dlg.bar, "mode", "determinate"),
-                    dlg.bar.config(maximum=len(svals), value=0),
+                    dlg.bar.config(maximum=len(set(secciones)), value=0),
                     dlg.msg_var.set("Copiando mapas de cada sección...")
                 ))
 
@@ -364,10 +397,10 @@ class App(BaseApp):
                             return
                         i += 1
 
-                for code in sorted(svals):
-                    paths = code_to_paths.get(code, [])
+                for edo, secc in zip(estados, secciones):
+                    paths = edoSeccPathDic[edo][secc]
                     if not paths:
-                        unmatched.append(code)
+                        unmatched.append(secc)
                         continue
                     for p in paths:
                         safe_copy(p, export_dir)
@@ -376,7 +409,7 @@ class App(BaseApp):
                     # UI update from worker via after()
                     self.after(0, lambda i=progress_i: (
                         dlg.bar.config(value=i),
-                        dlg.msg_var.set(f"{i}/{len(svals)} secciones")
+                        dlg.msg_var.set(f"{i}/{len(secciones)} secciones")
                     ))
 
                 # Escribir sin_mapa.txt
@@ -394,8 +427,8 @@ class App(BaseApp):
                 def done_ui():
                     dlg.destroy()
                     message = [
-                        f"PDFs en cartografia: {pdf_count}",
-                        f"Secciones únicas en la muestra: {len(svals)}",
+                        f"PDFs en leidos: {pdf_count}",
+                        f"Secciones únicas en la muestra: {len(secciones)}",
                         f"PDFs copiados: {copied}",
                         f"Secciones sin mapa: {len(unmatched)}",
                         f"\nCarpeta exportada:\n{export_dir}"
