@@ -1,1 +1,17 @@
-En este proyecto apliqué SARSA(λ) para llegar a una política óptima para el Blackjack. Adicionalmente, dentro de la implementación se encuentra una clase para simular rondas del juego, así como una clase que además de simular rondas usa la llamada 'basic strategy' para tomar decisiones, esto para al final comparar esta estrategia perfecta con la que obtiene nuestro agente, así como con una estrategia 'vanilla' ligeramente mejor que una aleatoria.
+En este proyecto apliqué SARSA(λ) para llegar a una política óptima para el Blackjack. Dentro de la implementación se encuentra una clase para simular rondas del juego, así como una clase que además de simular rondas usa la llamada 'basic strategy' para tomar decisiones, esto para al final comparar esta estrategia perfecta con la que obtiene nuestro agente, así como con una estrategia 'vanilla' ligeramente mejor que una aleatoria.
+
+Resultados:
+10,000 blackjack hands simulation with vanilla strategy
+Win percentage: 38.45%
+Loss percentage: 51.06%
+Push percentage: 10.49%
+
+10,000 blackjack hands simulation played by our agent
+Win percentage: 40.11%
+Loss percentage: 52.03%
+Push percentage: 7.86%
+
+10,000 blackjack hands simulation playing a perfect basic strategy
+Win percentage: 43.42%
+Loss percentage: 48.03%
+Push percentage: 8.55%
